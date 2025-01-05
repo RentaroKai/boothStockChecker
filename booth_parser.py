@@ -257,7 +257,7 @@ class BoothParserApp:
             current_dir = os.path.abspath(os.path.dirname(__file__))
             output_path = os.path.join(current_dir, "output.csv")
             
-            with open(output_path, mode="w", encoding="utf-8", newline="") as f:
+            with open(output_path, mode="w", encoding="utf-8-sig", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
                 writer.writeheader()
                 for p in products_info:
