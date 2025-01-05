@@ -7,7 +7,7 @@ from tkinter.scrolledtext import ScrolledText
 def parse_products(text: str):
     """
     与えられたテキストから
-    「基礎商品名, 商品名, 価格, 在庫, 販売数, 売上金額, 発送待ちメール数」
+    「公開ステータス, 基礎商品名, 商品名, 価格, 在庫, 販売数, 売上金額, 発送待ちメール数」
     を抽出し、辞書のリストとして返す
     """
     # 公開ステータス系キーワード
@@ -28,6 +28,7 @@ def parse_products(text: str):
 
     products = []
 
+    current_status = None         # 公開ステータス
     current_base_name = None       # 基礎商品名
     current_name = None            # バリエーション or 商品名
     shipment_wait_count = None     # 発送待ちメール数
@@ -60,6 +61,7 @@ def parse_products(text: str):
                 potential_name = lines[i + 1]
                 if potential_name == "_END_OF_TEXT_":
                     break
+                current_status = line  # 公開ステータスを保存
                 current_base_name = potential_name
             i += 2
             # 新たな基礎商品になったタイミングで発送待ちメール数などをクリア
@@ -165,6 +167,7 @@ def parse_products(text: str):
                 current_name = current_base_name
 
             products.append({
+                "公開ステータス": current_status,
                 "基礎商品名": current_base_name,
                 "商品名": current_name,
                 "価格": price,
@@ -239,6 +242,7 @@ class BoothParserApp:
         try:
             products_info = parse_products(input_text)
             fieldnames = [
+                "公開ステータス",
                 "基礎商品名",
                 "商品名",
                 "価格",
