@@ -3,6 +3,7 @@ import re
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.scrolledtext import ScrolledText
+import os
 
 def parse_products(text: str):
     """
@@ -252,13 +253,31 @@ class BoothParserApp:
                 "発送待ちメール数"
             ]
             
-            with open("output.csv", mode="w", encoding="utf-8", newline="") as f:
+            # カレントディレクトリのフルパスを取得
+            current_dir = os.path.abspath(os.path.dirname(__file__))
+            output_path = os.path.join(current_dir, "output.csv")
+            
+            with open(output_path, mode="w", encoding="utf-8", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
                 writer.writeheader()
                 for p in products_info:
                     writer.writerow(p)
             
-            messagebox.showinfo("成功", "CSVファイルを作成しました。\nファイル名: output.csv")
+            # 全ての通知をまとめる
+            message = "CSVファイルを作成しました！\n\n"
+            message += f"保存先フォルダ:\n{current_dir}\n"
+            
+            # 発送待ちメール数のチェック
+            waiting_products = [p for p in products_info if p["公開ステータス"] == "公開中" and 
+                              isinstance(p["発送待ちメール数"], (int, float)) and 
+                              p["発送待ちメール数"] > 0]
+            
+            if waiting_products:
+                message += "\n発送待ちメールがある商品:\n"
+                for p in waiting_products:
+                    message += f"・{p['基礎商品名']} ({p['発送待ちメール数']}件)\n"
+            
+            messagebox.showinfo("処理完了", message)
         
         except Exception as e:
             messagebox.showerror("エラー", f"CSVファイルの作成中にエラーが発生しました。\n{str(e)}")
